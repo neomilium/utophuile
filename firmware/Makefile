@@ -24,7 +24,8 @@ HEX=	utophuile.hex
 
 all: $(HEX)
 
-utophuile.out: $(OBJS)
+
+utophuile.out: config.h $(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $^ 
 
 %.o: %.c
@@ -32,6 +33,8 @@ utophuile.out: $(OBJS)
 
 %.hex: %.out
 	$(OBJCOPY) -R .eeprom -O ihex $< $@
+
+config.h: update-config
 
 clean:
 	rm -rf *.out $(OBJS) $(HEX)
