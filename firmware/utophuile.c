@@ -173,16 +173,19 @@ main ( void ) {
 			case 'a': /* ADC raw data */
 				printf ( "a=%d", adc_convert() );
 				break;
+			case 'v': /* Version */
+				printf_P ( PSTR ( "\n"PACKAGE_STRING"\n" ) );
+				break;
 			case 't': /* temperature */
 #ifdef SIMULATE_TEMP
 				if ( sscanf ( buf, "%*s %d", &d ) > 0 ) {
 					printf ( "set temperature to %d", d );
 					_fake_utophuile_oil_temperature = d;
 				} else {
-#endif /* SIMULATE_TEMP */
-					printf ( "t=%d", utophuile_oil_temperature() );
-#ifdef SIMULATE_TEMP
+					printf ( "t=%d (sim)", utophuile_oil_temperature() );
 				}
+#else /* SIMULATE_TEMP */
+					printf ( "t=%d", utophuile_oil_temperature() );
 #endif /* SIMULATE_TEMP */
 				break;
 		}
@@ -192,11 +195,19 @@ main ( void ) {
 	return ( 0 );
 }
 
+static uint8_t _previous_utophuile_oil_temperature = 20;
+
 uint8_t
 utophuile_oil_temperature ( void ) {
 #ifndef SIMULATE_TEMP
-	const int8_t temp = 180 - ( adc_convert() /2 );
-	return ( uint8_t ) temp;
+	const int8_t temp = 185 - ( adc_convert() /2 );
+	uint8_t mean = ( _previous_utophuile_oil_temperature + ( uint8_t ) temp );
+// 	return ( uint8_t ) temp;
+	mean /= 2;
+	mean = ( _previous_utophuile_oil_temperature + mean );
+	mean /= 2;
+	_previous_utophuile_oil_temperature = mean;
+	return mean;
 #else
 	return _fake_utophuile_oil_temperature;
 #endif /* SIMULATE_TEMP */
@@ -223,6 +234,7 @@ utophuile_update_gauge_light_color( uint8_t oil_temperature )
 
 void
 utophuile_toggle_gauge_light( void ) {
+// 	printf_P(PSTR("gauge light toggled"));
 	if( _gauge_light_enabled != 0 ) {
 		rgb_set( RGB_OFF );
 		_gauge_light_enabled = 0;
