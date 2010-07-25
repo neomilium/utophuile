@@ -9,7 +9,7 @@
 
 #include <stdio.h>
 
-#define LEDS_COM	GET_BIT(PORTD).bit7
+#define LEDS_COM	GET_BIT(PORTD).bit6
 #define LED2		GET_BIT(PORTC).bit2
 #define LED1		GET_BIT(PORTC).bit3
 #define LED0		GET_BIT(PORTC).bit4
@@ -64,8 +64,8 @@ leds_init(void)
 	/* Enable LEDs port as output. */
 	DDRC |= (_BV(PC2) | _BV(PC3) | _BV(PC4));
 
-	/* Set output direction for PD7 */
-        DDRD |= _BV(PD7);
+	/* Set output direction for PD6 */
+        DDRD |= _BV(PD6);
 
 	scheduler_add_hook_fct( leds_process );
 }
@@ -96,8 +96,8 @@ leds_pwm_stop(void)
 	/* Disable timer 2 overflow interrupt. */
 	TIMSK &= ~(_BV(TOIE2));
 
-	/* Enable PD7 as output. */
-	DDRD |= _BV(PD7);
+	/* Enable PD6 as output. */
+	DDRD |= _BV(PD6);
 }
 
 

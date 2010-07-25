@@ -6,7 +6,8 @@
 
 #include <stdio.h>
 
-#define RGB_COM		GET_BIT(PORTD).bit5
+// #define RGB_COM		GET_BIT(PORTD).bit5
+#define RGB_COM		GET_BIT(PORTD).bit7
 #define LED_RED		GET_BIT(PORTA).bit0
 #define LED_GREEN	GET_BIT(PORTA).bit1
 #define LED_BLUE	GET_BIT(PORTA).bit2
@@ -29,7 +30,7 @@ rgb_init(void)
 
 	/* Enable LEDs port as output. */
 	DDRA |= (_BV(PA0) | _BV(PA1) | _BV(PA2));
-	DDRD |= _BV(PD5);
+	DDRD |= _BV(PD7);
 	rgb_set(RGB_OFF);
 }
 
