@@ -25,7 +25,7 @@ HEX=	utophuile.hex
 all: $(HEX)
 
 
-utophuile.out: config.h $(OBJS)
+utophuile.out: version.h $(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $^ 
 
 %.o: %.c
@@ -34,15 +34,17 @@ utophuile.out: config.h $(OBJS)
 %.hex: %.out
 	$(OBJCOPY) -R .eeprom -O ihex $< $@
 
-config.h: update-config
+version.h: update-version
 
 clean:
 	rm -rf *.out $(OBJS) $(HEX)
 
-PACKAGE_VERSION=$(shell date +%Y-%m-%d)
+COMPILE_DATE=$(shell date +"%Y-%m-%d %H:%M:%S")
+PACKAGE_VERSION="$(COMPILE_DATE)"
 PACKAGE_STRING="UtopHuile $(PACKAGE_VERSION)"
-update-config:
-	echo "#define PACKAGE_STRING \"$(PACKAGE_STRING)\"" > config.h
+
+update-version:
+	echo "#define PACKAGE_STRING \"$(PACKAGE_STRING)\"" > version.h
 
 AVRDUDE_PROGRAMMER=stk500v2
 AVRDUDE_MCU=m8535
