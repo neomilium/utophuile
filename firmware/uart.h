@@ -1,3 +1,6 @@
+#ifndef __UART_H__
+#define __UART_H__
+
 /*
  * ----------------------------------------------------------------------------
  * "THE BEER-WARE LICENSE" (Revision 42):
@@ -10,29 +13,27 @@
  *
  * $Id: uart.h,v 1.1 2005/12/28 21:38:59 joerg_wunsch Exp $
  */
-#ifndef __UART_H__
-#define __UART_H__
 
 /*
  * Perform UART startup initialization.
  */
-void	uart_init(void);
+void    uart_init (void);
 
 /*
  * Send one character to the UART.
  */
-int	uart_putchar(char c, FILE *stream);
+int     uart_putchar (char c, FILE * stream);
 
 /*
  * Size of internal line buffer used by uart_getchar().
  */
-#define RX_BUFSIZE 80
+#define RX_BUFSIZE 160
 
 /*
  * Receive one character from the UART.  The actual reception is
  * line-buffered, and one character is returned from the buffer at
  * each invokation.
  */
-int	uart_getchar(FILE *stream);
+int     uart_getchar (FILE * stream);
 
-#endif				/* !__UART_H__ */
+#endif // __UART_H__
