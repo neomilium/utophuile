@@ -1,6 +1,7 @@
 CC=avr-gcc
 OBJCOPY=avr-objcopy
 
+PROJECT_NAME=utophuile
 MCU=atmega8535
 CFLAGS=-W -Wall -ansi -pedantic -std=c99 -funsigned-bitfields -fpack-struct -fshort-enums -mmcu=$(MCU) -fno-jump-tables -mcall-prologues -Os -DF_CPU=8000000UL
 LDFLAGS=-mmcu=$(MCU)
@@ -66,4 +67,7 @@ cppcheck:
 
 reset:
 	$(SUDO) avrdude -p $(AVRDUDE_MCU) -c $(AVRDUDE_PROGRAMMER) -P $(AVRDUDE_PORT)
+
+size:
+	avr-size -C --mcu=$(MCU) $(PROJECT_NAME).out
 
