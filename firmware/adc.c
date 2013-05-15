@@ -22,7 +22,7 @@ ISR(ADC_vect)
 void
 adc_init(void)
 {
-  DDRA &= ~(_BV(PA7));
+  DDRC &= ~(_BV(PC0));
 
   ADMUX = _BV(REFS0) | _BV(ADLAR) | _BV(MUX2) | _BV(MUX1) | _BV(MUX0);	/* set reference voltage to VCC,
 										   set to left-adjusted result

@@ -6,7 +6,7 @@
 #include "scheduler.h"
 
 #define SCHEDULER_MAX_HOOK_FCT		10
-#define SCHEDULER_TCNT (0xFFFF - 31250) // Interrupt occurs (8 000 000 / 256) / 31250 = 1 hz
+#define SCHEDULER_TCNT (0xFFFF - 62500) // Interrupt occurs (16 000 000 / 256) / 62500 = 1 hz
 
 void scheduler_process_hooks(void);
 
@@ -24,11 +24,11 @@ ISR(TIMER1_OVF_vect)
 void
 scheduler_init(void)
 {
-  TCCR1B = _BV(CS12);    //	// Timer1 clock use prescaled clock at clk/256 (i.e. 8 000 000 / 256 = 31250 hz)
+  TCCR1B = _BV(CS12);    // Timer1 clock use prescaled clock at clk/256 (i.e. 16 000 000 / 256 = 62500 hz)
 
   TCNT1 = SCHEDULER_TCNT;
 
-  TIMSK |= _BV(TOIE1);	/* Enable interrupt */
+  TIMSK1 |= _BV(TOIE1);	/* Enable interrupt */
 }
 
 void

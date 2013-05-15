@@ -2,8 +2,8 @@ CC=avr-gcc
 OBJCOPY=avr-objcopy
 
 PROJECT_NAME=utophuile
-MCU=atmega8535
-CFLAGS=-W -Wall -ansi -pedantic -std=c99 -funsigned-bitfields -fpack-struct -fshort-enums -mmcu=$(MCU) -fno-jump-tables -mcall-prologues -Os -DF_CPU=8000000UL
+MCU=atmega328p
+CFLAGS=-W -Wall -ansi -pedantic -std=c99 -funsigned-bitfields -fpack-struct -fshort-enums -mmcu=$(MCU) -fno-jump-tables -mcall-prologues -Os -DF_CPU=16000000UL
 LDFLAGS=-mmcu=$(MCU)
 
 #CFLAGS+=-DSIMULATE_TEMP=1
@@ -12,9 +12,9 @@ SRCS=	adc.c \
 	beep.c \
 	buttons.c \
 	leds.c \
-	rgb.c \
 	relay.c \
 	scheduler.c \
+	shell.c \
 	twi.c \
 	uart.c \
 	utophuile.c
@@ -49,9 +49,9 @@ update-version:
 	echo "#define PACKAGE_STRING \"$(PACKAGE_STRING)\"" > version.h
 
 AVRDUDE_PROGRAMMER=stk500v2
-AVRDUDE_MCU=m8535
-AVRDUDE_PORT=/dev/ttyACM0
-SUDO=
+AVRDUDE_MCU=atmega328p
+AVRDUDE_PORT=usb
+SUDO=sudo
 
 flash: $(HEX)
 	$(SUDO) avrdude -p $(AVRDUDE_MCU) -c $(AVRDUDE_PROGRAMMER) -P $(AVRDUDE_PORT) -U flash:w:$(HEX):i

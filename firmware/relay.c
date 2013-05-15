@@ -10,7 +10,7 @@ void relay_process(void);
 void
 relay_init(void)
 {
-  twi_connection_state = TWI_CONNECTION_OK;
+  relay_connection_state = RELAY_CONNECTION_OK;
   scheduler_add_hook_fct(relay_process);
 }
 
@@ -25,8 +25,8 @@ relay_process(void)
 {
   uint8_t pcf_data = (~_relay_mode) | 0x0F;
   if (-1 == twi_write_bytes(0x40, 1, &pcf_data)) {
-    twi_connection_state = TWI_CONNECTION_BROKEN;
+    relay_connection_state = RELAY_CONNECTION_BROKEN;
   } else {
-    twi_connection_state = TWI_CONNECTION_OK;
+    relay_connection_state = RELAY_CONNECTION_OK;
   }
 }

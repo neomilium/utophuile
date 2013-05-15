@@ -35,8 +35,8 @@
 uint8_t twst;
 
 #define TWI_PORT PORTC
-#define SCL	PC0
-#define SDA	PC1
+#define SCL	PC5
+#define SDA	PC4
 
 void
 twi_init(void)
@@ -54,7 +54,6 @@ twi_init(void)
 #else
   TWBR = (F_CPU / 100000UL - 16) / 2;
 #endif
-  printf("twi_init()\n");
 }
 
 /*

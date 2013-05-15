@@ -7,11 +7,12 @@
 
 #include <string.h>
 
-#define TIMER0_PWM_INIT		_BV(WGM01) | _BV(COM00) | _BV(CS01) | _BV(CS00)	/* 8 Mhz / 64 */
 
-#define OCR			OCR0
-#define DDROC			DDRB
-#define OC0			PB3
+#define OCR			OCR0A
+#define DDROC			DDRD
+#define OC0			PD6
+#define TCCRA			TCCR0A
+#define TCCRB			TCCR0B
 
 #include "leds.h"
 
@@ -134,7 +135,9 @@ beep_ctc_start(void)
   DDROC |= _BV(OC0);
 
   /* Timer 0 is 8-bit PWM. */
-  TCCR0 = TIMER0_PWM_INIT;
+  TCCRA = _BV(WGM01) | _BV(COM0A0);	/*  Compare Output Mode, Fast PWM Mode + CTC mode */
+  // FIXME: new board runs at 16Mhz
+  TCCRB = _BV(CS01) | _BV(CS00);	/* 8 Mhz / 64 */
 
   /* Enable timer 0 overflow interrupt. */
 // 	TIMSK |= _BV(OCIE0);
@@ -144,7 +147,7 @@ void
 beep_ctc_stop(void)
 {
   /* Timer 0 is 8-bit PWM. */
-  TCCR0 = 0x00;
+  TCCRA = 0x00;
 
   /* Disable timer 2 overflow interrupt. */
 // 	TIMSK &= ~(_BV(OCIE0));

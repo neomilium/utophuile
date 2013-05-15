@@ -57,14 +57,14 @@ buttons_init(void)
   PORTD |= _BV(PD2);		// Enable internal pull up
 
   MCUCR |= _BV(ISC00);		// Enable INT0 on both failing and rising edge
-  GICR |= _BV(INT0);
+  EIMSK |= _BV(INT0);
 
   /* Gauge button */
   DDRD &= ~(_BV(PD3));            // PD3 as input
   PORTD |= _BV(PD3);		// Enable internal pull up
 
   MCUCR |= _BV(ISC10);		// Enable INT1 on both failing and rising edge
-  GICR |= _BV(INT1);
+  EIMSK |= _BV(INT1);
 
   scheduler_add_hook_fct(buttons_process);
 }

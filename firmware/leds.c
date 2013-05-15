@@ -30,6 +30,7 @@ enum { UP, DOWN };
 
 static leds_mode_t _leds_mode = LED_ALL_OFF;
 
+#if 0
 ISR(TIMER2_OVF_vect)
 {
   static uint16_t pwm;
@@ -52,6 +53,7 @@ ISR(TIMER2_OVF_vect)
     OCR = pwm;
   }
 }
+#endif
 
 void leds_process(void);
 
@@ -69,6 +71,7 @@ leds_init(void)
   scheduler_add_hook_fct(leds_process);
 }
 
+#if 0
 void
 leds_pwm_start(void)
 {
@@ -98,7 +101,7 @@ leds_pwm_stop(void)
   /* Enable PD6 as output. */
   DDRD |= _BV(PD6);
 }
-
+#endif
 
 void
 leds_set(const leds_mode_t mode)
