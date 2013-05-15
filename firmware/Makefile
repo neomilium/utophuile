@@ -49,10 +49,11 @@ update-version:
 
 AVRDUDE_PROGRAMMER=stk500v2
 AVRDUDE_MCU=m8535
+AVRDUDE_PORT=/dev/ttyACM0
 SUDO=
 
 flash: $(HEX)
-	$(SUDO) avrdude -p $(AVRDUDE_MCU) -c $(AVRDUDE_PROGRAMMER) -P /dev/ttyACM0 -U flash:w:$(HEX):i 
+	$(SUDO) avrdude -p $(AVRDUDE_MCU) -c $(AVRDUDE_PROGRAMMER) -P $(AVRDUDE_PORT) -U flash:w:$(HEX):i
 
 mrproper: clean
 	rm -rf *.o *~
@@ -62,4 +63,7 @@ cppcheck:
 	    --check-config .
 	cppcheck --quiet --enable=all --std=posix --std=c99 \
 	    --force --inconclusive .
+
+reset:
+	$(SUDO) avrdude -p $(AVRDUDE_MCU) -c $(AVRDUDE_PROGRAMMER) -P $(AVRDUDE_PORT)
 
