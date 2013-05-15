@@ -2,11 +2,11 @@
 #define __RGB_H__
 
 typedef enum {
-		RGB_OFF,
-		RGB_BLUE,
-		RGB_GREEN,
-		RGB_YELLOW,
-		RGB_RED,
+  RGB_OFF,
+  RGB_BLUE,
+  RGB_GREEN,
+  RGB_YELLOW,
+  RGB_RED,
 } rgb_mode_t;
 
 void rgb_init(void);

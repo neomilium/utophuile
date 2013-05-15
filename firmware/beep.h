@@ -4,6 +4,6 @@
 #include <avr/pgmspace.h>
 
 void beep_init(void);
-void beep_play_partition_P(char* partition);
+void beep_play_partition_P(char *partition);
 
 #endif				/* !__BEEP_H__ */

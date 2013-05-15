@@ -3,6 +3,6 @@
 
 #include <stdint.h>
 
-void		scheduler_init  (void);
-void		scheduler_add_hook_fct ( void ( *fct ) ( void ) );
+void		scheduler_init(void);
+void		scheduler_add_hook_fct(void (*fct)(void));
 #endif

@@ -30,146 +30,145 @@ enum { UP, DOWN };
 
 static leds_mode_t _leds_mode = LED_ALL_OFF;
 
-ISR (TIMER2_OVF_vect)
+ISR(TIMER2_OVF_vect)
 {
-	static uint16_t pwm;
-	static uint8_t direction;
+  static uint16_t pwm;
+  static uint8_t direction;
 
-	switch (direction)
-	{
-	case UP:
-		if (++pwm == TIMER2_TOP)
-		direction = DOWN;
-		break;
-	
-	case DOWN:
-		if (--pwm == 0)
-		direction = UP;
-		break;
-	}
-	if ( pwm < 50 ) {
-		OCR = 0;
-	} else {
-		OCR = pwm;
-	}
+  switch (direction) {
+    case UP:
+      if (++pwm == TIMER2_TOP)
+        direction = DOWN;
+      break;
+
+    case DOWN:
+      if (--pwm == 0)
+        direction = UP;
+      break;
+  }
+  if (pwm < 50) {
+    OCR = 0;
+  } else {
+    OCR = pwm;
+  }
 }
 
 void leds_process(void);
 
-void 
+void
 leds_init(void)
 {
-	printf("leds_init()\n");
+  printf("leds_init()\n");
 
-	/* Enable LEDs port as output. */
-	DDRC |= (_BV(PC2) | _BV(PC3) | _BV(PC4));
+  /* Enable LEDs port as output. */
+  DDRC |= (_BV(PC2) | _BV(PC3) | _BV(PC4));
 
-	/* Set output direction for PD6 */
-        DDRD |= _BV(PD6);
+  /* Set output direction for PD6 */
+  DDRD |= _BV(PD6);
 
-	scheduler_add_hook_fct( leds_process );
+  scheduler_add_hook_fct(leds_process);
 }
 
 void
 leds_pwm_start(void)
 {
-	/* Enable OC2 as output. */
-	DDROC |= _BV(OC2);
+  /* Enable OC2 as output. */
+  DDROC |= _BV(OC2);
 
-	/* Timer 2 is 8-bit PWM. */
-	TCCR2 = TIMER2_PWM_INIT;
+  /* Timer 2 is 8-bit PWM. */
+  TCCR2 = TIMER2_PWM_INIT;
 
-	/* Set PWM value to 0. */
-	OCR = 0;
+  /* Set PWM value to 0. */
+  OCR = 0;
 
-	/* Enable timer 2 overflow interrupt. */
+  /* Enable timer 2 overflow interrupt. */
 // 	TIFR &= ~(_BV (TOV2));
-	TIMSK |= _BV(TOIE2);
+  TIMSK |= _BV(TOIE2);
 }
 
 void
 leds_pwm_stop(void)
 {
-	/* Timer 2 is 8-bit PWM. */
-	TCCR2 = 0x00;
+  /* Timer 2 is 8-bit PWM. */
+  TCCR2 = 0x00;
 
-	/* Disable timer 2 overflow interrupt. */
-	TIMSK &= ~(_BV(TOIE2));
+  /* Disable timer 2 overflow interrupt. */
+  TIMSK &= ~(_BV(TOIE2));
 
-	/* Enable PD6 as output. */
-	DDRD |= _BV(PD6);
+  /* Enable PD6 as output. */
+  DDRD |= _BV(PD6);
 }
 
 
 void
 leds_set(const leds_mode_t mode)
 {
-	switch(mode) {
-		case LED_ALL_OFF:
+  switch (mode) {
+    case LED_ALL_OFF:
 // 				leds_pwm_stop();
-				LEDS_COM = 1;
-				LED0 = LED_DISABLED;
-				LED1 = LED_DISABLED;
-				LED2 = LED_DISABLED;
-				break;
-		case LED_ALL_BLINK:
+      LEDS_COM = 1;
+      LED0 = LED_DISABLED;
+      LED1 = LED_DISABLED;
+      LED2 = LED_DISABLED;
+      break;
+    case LED_ALL_BLINK:
 // 				leds_pwm_start();
-				LED0 = LED_ENABLED;
-				LED1 = LED_ENABLED;
-				LED2 = LED_ENABLED;
-				break;
-		case LED_GREEN_ON:
+      LED0 = LED_ENABLED;
+      LED1 = LED_ENABLED;
+      LED2 = LED_ENABLED;
+      break;
+    case LED_GREEN_ON:
 // 				leds_pwm_stop();
-				LEDS_COM = 1;
-				LED0 = LED_ENABLED;
-				LED1 = LED_DISABLED;
-				LED2 = LED_DISABLED;
-				break;
-		case LED_GREEN_BLINK:
+      LEDS_COM = 1;
+      LED0 = LED_ENABLED;
+      LED1 = LED_DISABLED;
+      LED2 = LED_DISABLED;
+      break;
+    case LED_GREEN_BLINK:
 // 				leds_pwm_start();
-				LED0 = LED_ENABLED;
-				LED1 = LED_DISABLED;
-				LED2 = LED_DISABLED;
-				break;
-		case LED_ORANGE_ON:
+      LED0 = LED_ENABLED;
+      LED1 = LED_DISABLED;
+      LED2 = LED_DISABLED;
+      break;
+    case LED_ORANGE_ON:
 // 				leds_pwm_stop();
-				LEDS_COM = 1;
-				LED0 = LED_DISABLED;
-				LED1 = LED_ENABLED;
-				LED2 = LED_DISABLED;
-				break;
-		case LED_ORANGE_BLINK:
+      LEDS_COM = 1;
+      LED0 = LED_DISABLED;
+      LED1 = LED_ENABLED;
+      LED2 = LED_DISABLED;
+      break;
+    case LED_ORANGE_BLINK:
 // 				leds_pwm_start();
-				LED0 = LED_DISABLED;
-				LED1 = LED_ENABLED;
-				LED2 = LED_DISABLED;
-				break;
-		case LED_RED_ON:
+      LED0 = LED_DISABLED;
+      LED1 = LED_ENABLED;
+      LED2 = LED_DISABLED;
+      break;
+    case LED_RED_ON:
 // 				leds_pwm_stop();
-				LEDS_COM = 1;
-				LED0 = LED_DISABLED;
-				LED1 = LED_DISABLED;
-				LED2 = LED_ENABLED;
-				break;
-		case LED_RED_BLINK:
+      LEDS_COM = 1;
+      LED0 = LED_DISABLED;
+      LED1 = LED_DISABLED;
+      LED2 = LED_ENABLED;
+      break;
+    case LED_RED_BLINK:
 // 				leds_pwm_start();
-				LED0 = LED_DISABLED;
-				LED1 = LED_DISABLED;
-				LED2 = LED_ENABLED;
-				break;
-	};
-	_leds_mode = mode;
+      LED0 = LED_DISABLED;
+      LED1 = LED_DISABLED;
+      LED2 = LED_ENABLED;
+      break;
+  };
+  _leds_mode = mode;
 }
 
 void
-leds_process( void )
+leds_process(void)
 {
-	if ( _leds_mode & BLINK_MASK ) {
-		if ( LEDS_COM ) {
-			LEDS_COM = 0;
-		} else {
-			LEDS_COM = 1;
-		}
-	}
+  if (_leds_mode & BLINK_MASK) {
+    if (LEDS_COM) {
+      LEDS_COM = 0;
+    } else {
+      LEDS_COM = 1;
+    }
+  }
 }
 
