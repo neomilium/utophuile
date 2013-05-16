@@ -39,8 +39,9 @@ version.h: update-version
 clean:
 	rm -rf *.out $(OBJS) $(HEX)
 
+GIT_DESCRIBE=$(shell git describe --tags)
 COMPILE_DATE=$(shell date +"%Y-%m-%d %H:%M:%S")
-PACKAGE_VERSION="$(COMPILE_DATE)"
+PACKAGE_VERSION="$(GIT_DESCRIBE) (compiled: $(COMPILE_DATE))"
 PACKAGE_STRING="UtopHuile $(PACKAGE_VERSION)"
 
 update-version:
