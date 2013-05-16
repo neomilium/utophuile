@@ -82,6 +82,8 @@ main ( void ) {
 	twi_init();
 	relay_init();
 
+	utophuile_toggle_gauge_light();
+
 	scheduler_add_hook_fct ( utophuile_process );
 
 	sei();   /* Enable interrupts */
