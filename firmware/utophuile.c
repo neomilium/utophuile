@@ -53,7 +53,7 @@ typedef enum {
 static volatile alerter_mode_t _utophuile_alerter_mode = UTOPHUILE_ALERTER_ENABLED;
 
 #define UTOPHUILE_TOLERENCE_OIL_TEMPERATURE 3
-#define UTOPHUILE_MIN_OIL_TEMPERATURE  69 /* Stop when < MIN_OIL_TEMP, ready when > ( MIN_OIL_TEMP + TOLERENCE ) */
+#define UTOPHUILE_MIN_OIL_TEMPERATURE  59 /* Stop when < MIN_OIL_TEMP, ready when > ( MIN_OIL_TEMP + TOLERENCE ) */
 #define UTOPHUILE_MAX_OIL_TEMPERATURE  94 /* Stop when > MAX_OIL_TEMP, ready when < ( MAX_OIL_TEMP + TOLERENCE ) */
 
 #define GAUGE_TEMP_STAGE1	UTOPHUILE_MIN_OIL_TEMPERATURE + 1
