@@ -56,3 +56,10 @@ flash: $(HEX)
 
 mrproper: clean
 	rm -rf *.o *~
+
+cppcheck:
+	cppcheck --quiet \
+	    --check-config .
+	cppcheck --quiet --enable=all --std=posix --std=c99 \
+	    --force --inconclusive .
+
