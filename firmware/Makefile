@@ -50,7 +50,7 @@ update-version:
 
 AVRDUDE_PROGRAMMER=stk500v2
 AVRDUDE_MCU=atmega328p
-AVRDUDE_PORT=usb
+AVRDUDE_PORT=/dev/ttyACM0
 SUDO=sudo
 
 flash: $(HEX)
