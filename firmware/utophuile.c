@@ -76,12 +76,12 @@ main(void)
   printf_P(PSTR("\n"PACKAGE_STRING"\n"));
 
   scheduler_init();
-  /*
-    buttons_init();
-    leds_init();
+  
+//    buttons_init();
+//    leds_init();
     beep_init();
-    adc_init();
-*/
+//    adc_init();
+
     twi_init();
 //    relay_init();
   
@@ -94,8 +94,6 @@ main(void)
   sei();   /* Enable interrupts */
 
   utophuile_set_mode(UTOPHUILE_MODE_OFF);
-
-// beep_play_partition_P(PSTR("A_A"));
 
   //static char buf[20], s[20];
   // int d;
@@ -241,12 +239,12 @@ utophuile_process(void)
 
     if (requested_action == BUTTON_ACTION_POWER) {
       utophuile_set_mode(UTOPHUILE_MODE_OFF);
-      beep_play_partition_P(PSTR("CB"));
+      beep_play_partition_P(PSTR("Cb"));
     }
   } else {
     if (requested_action == BUTTON_ACTION_POWER) {
       utophuile_set_mode(UTOPHUILE_MODE_HEATING);
-      beep_play_partition_P(PSTR("BC"));
+      beep_play_partition_P(PSTR("bC"));
     }
   }
 
