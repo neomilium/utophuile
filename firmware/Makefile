@@ -8,7 +8,7 @@ LDFLAGS=-mmcu=$(MCU)
 
 #CFLAGS+=-DSIMULATE_TEMP=1
 
-SRCS=	adc.c \
+SRCS=	\
 	beep.c \
 	buttons.c \
 	leds.c \

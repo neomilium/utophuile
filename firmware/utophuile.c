@@ -9,7 +9,6 @@
 
 #include "utophuile.h"
 
-#include "adc.h"
 #include "leds.h"
 #include "beep.h"
 #include "buttons.h"
@@ -166,14 +165,7 @@ uint8_t
 utophuile_oil_temperature(void)
 {
 #ifndef SIMULATE_TEMP
-  const int8_t temp = 185 - (adc_convert() / 2);
-  uint8_t mean = (_previous_utophuile_oil_temperature + (uint8_t) temp);
-// 	return ( uint8_t ) temp;
-  mean /= 2;
-  mean = (_previous_utophuile_oil_temperature + mean);
-  mean /= 2;
-  _previous_utophuile_oil_temperature = mean;
-  return mean;
+  return 10;
 #else
   return _fake_utophuile_oil_temperature;
 #endif /* SIMULATE_TEMP */
