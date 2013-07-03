@@ -35,7 +35,6 @@ typedef enum {
 
 void utophuile_process(void);
 void utophuile_set_mode(utophuile_mode_t mode);
-uint8_t utophuile_oil_temperature(void);
 
 // Shell commands
 shell_command_t shell_commands[SHELL_COMMAND_COUNT];
@@ -78,11 +77,14 @@ main(void)
   
 //    buttons_init();
 //    leds_init();
-    beep_init();
-//    adc_init();
 
-    twi_init();
-//    relay_init();
+  // Buzzer
+  beep_init();
+
+  // I²C / TWI
+  twi_init();
+
+//  relay_init();
   
   scheduler_add_hook_fct(utophuile_process);
 
@@ -94,11 +96,6 @@ main(void)
 
   utophuile_set_mode(UTOPHUILE_MODE_OFF);
 
-  //static char buf[20], s[20];
-  // int d;
-  //unsigned int x;
-
-  printf_P(PSTR("$ "));
   for (;;) {
     shell_loop();
     /*
@@ -133,9 +130,6 @@ main(void)
               printf("report mode on\n");
             }
             break;
-          case 'a': // ADC raw data
-            printf("a=%d", adc_convert());
-            break;
           case 'v': // Version
             printf_P(PSTR("\n"PACKAGE_STRING"\n"));
             break;
@@ -158,8 +152,6 @@ main(void)
   }
   return (0);
 }
-
-static uint8_t _previous_utophuile_oil_temperature = 20;
 
 uint8_t
 utophuile_oil_temperature(void)
@@ -208,7 +200,6 @@ utophuile_set_mode(utophuile_mode_t mode)
   }
 }
 
-// extern volatile relay_connection_state_t relay_connection_state;
 void
 utophuile_process(void)
 {
@@ -245,7 +236,7 @@ utophuile_process(void)
       // Nothing to do
       break;
     case UTOPHUILE_MODE_HEATING:
-//    wait for a correct oil temperature
+      // Wait for a correct oil temperature
       if (oil_temperature > UTOPHUILE_MIN_OIL_TEMPERATURE + UTOPHUILE_TOLERENCE_OIL_TEMPERATURE) {
         utophuile_set_mode(UTOPHUILE_MODE_READY);
         beep_play_partition_P(PSTR("F_F_F"));
@@ -254,41 +245,48 @@ utophuile_process(void)
       }
       break;
     case UTOPHUILE_MODE_READY:
+      // Wait for oil mode request while checking temperatures stay OK
       if (oil_temperature < UTOPHUILE_MIN_OIL_TEMPERATURE) {
         utophuile_set_mode(UTOPHUILE_MODE_HEATING);
       } else if (oil_temperature > UTOPHUILE_MAX_OIL_TEMPERATURE) {
         utophuile_set_mode(UTOPHUILE_MODE_EMERGENCY);
       } else if (requested_action == BUTTON_ACTION_OK) {
-//     wait for oil button
+        // User ask for oil mode
         utophuile_set_mode(UTOPHUILE_MODE_OIL);
         beep_play_partition_P(PSTR("F"));
       }
       break;
     case UTOPHUILE_MODE_OIL:
+      // Check if all is OK
       if (oil_temperature < UTOPHUILE_MIN_OIL_TEMPERATURE) {
         utophuile_set_mode(UTOPHUILE_MODE_HEATING);
       } else if (oil_temperature > UTOPHUILE_MAX_OIL_TEMPERATURE) {
         utophuile_set_mode(UTOPHUILE_MODE_EMERGENCY);
       } else if (requested_action == BUTTON_ACTION_OK) {
+        // User want to stop oil usage
         utophuile_set_mode(UTOPHUILE_MODE_READY);
         beep_play_partition_P(PSTR("E"));
       }
       break;
     case UTOPHUILE_MODE_EMERGENCY:
+      // Waiting for lower oil temperature
       if (oil_temperature < UTOPHUILE_MAX_OIL_TEMPERATURE - UTOPHUILE_TOLERENCE_OIL_TEMPERATURE) {
         utophuile_set_mode(UTOPHUILE_MODE_READY);
         beep_play_partition_P(PSTR("E"));
       } else if (requested_action == BUTTON_ACTION_OK) {
+        // User want to stop beeps :)
         _utophuile_alerter_mode = UTOPHUILE_ALERTER_DISABLED;
       } else if (_utophuile_alerter_mode == UTOPHUILE_ALERTER_ENABLED) {
         beep_play_partition_P(PSTR("G"));
       }
       break;
     case UTOPHUILE_MODE_ERROR:
-      // wait for off button
+      // Something went wrong, checking if all is back to normal or emit repeated beeps
       if (relay_connection_state == CONNECTION_OK) {
+        // Back to normal
         utophuile_set_mode(_utophuile_previous_mode);
       } else if (requested_action == BUTTON_ACTION_OK) {
+        // User want to stop beeps :)
         _utophuile_alerter_mode = UTOPHUILE_ALERTER_DISABLED;
       } else if (_utophuile_alerter_mode == UTOPHUILE_ALERTER_ENABLED) {
         beep_play_partition_P(PSTR("GFG"));
