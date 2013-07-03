@@ -225,7 +225,7 @@ utophuile_process(void)
 
   /* Start / Stop actions */
   if (_utophuile_mode != UTOPHUILE_MODE_OFF) {
-    if (relay_connection_state != RELAY_CONNECTION_OK) {
+    if (relay_connection_state != CONNECTION_OK) {
       utophuile_set_mode(UTOPHUILE_MODE_ERROR);
     }
 
@@ -286,7 +286,7 @@ utophuile_process(void)
       break;
     case UTOPHUILE_MODE_ERROR:
       // wait for off button
-      if (relay_connection_state == RELAY_CONNECTION_OK) {
+      if (relay_connection_state == CONNECTION_OK) {
         utophuile_set_mode(_utophuile_previous_mode);
       } else if (requested_action == BUTTON_ACTION_OK) {
         _utophuile_alerter_mode = UTOPHUILE_ALERTER_DISABLED;
