@@ -35,8 +35,8 @@
 uint8_t twst;
 
 #define TWI_PORT PORTC
-#define SCL	PC5
-#define SDA	PC4
+#define SCL	PC5 	// Arduino Analog Input 5
+#define SDA	PC4 	// Arduino Analog Input 4
 
 void
 twi_init(void)
