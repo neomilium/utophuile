@@ -208,6 +208,12 @@ error:
  * actual number of data byte written.  It is up to the caller to
  * re-invoke it in order to write further data.
  */
+
+#define TWI_ERR_UNKNOWN -1
+#define TWI_ERR_NOT_IN_START -2
+#define TWI_ERR_MAX_ITER -3
+#define TWI_ERR_MUST_SEND_STOP -4
+#define TWI_ERR_DEVICE_WRITE_PROTECTED -5
 int
 twi_write_bytes(uint8_t addr, int len, uint8_t *buf)
 {
@@ -216,7 +222,7 @@ twi_write_bytes(uint8_t addr, int len, uint8_t *buf)
 
 restart:
   if (n++ >= MAX_ITER)
-    return -1;
+    return TWI_ERR_MAX_ITER;
 begin:
 
   /* Note [15] */
@@ -231,7 +237,7 @@ begin:
       goto begin;
 
     default:
-      return -1;		/* error: not in start condition */
+      return TWI_ERR_NOT_IN_START;		/* error: not in start condition */
       /* NB: do /not/ send stop condition */
   }
 
@@ -250,6 +256,7 @@ begin:
       goto begin;
 
     default:
+      rv = TWI_ERR_MUST_SEND_STOP;
       goto error;		/* must send stop condition */
   }
 
@@ -259,6 +266,7 @@ begin:
     while ((TWCR & _BV(TWINT)) == 0) ;        /* wait for transmission */
     switch ((twst = TW_STATUS)) {
       case TW_MT_DATA_NACK:
+        rv = TWI_ERR_DEVICE_WRITE_PROTECTED;
         goto error;		/* device write protected -- Note [16] */
 
       case TW_MT_DATA_ACK:
@@ -275,7 +283,7 @@ quit:
   return rv;
 
 error:
-  rv = -1;
+  if(rv==0) rv = TWI_ERR_UNKNOWN;
   goto quit;
 }
 
