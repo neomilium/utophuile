@@ -41,6 +41,7 @@ shell_command_t shell_commands[SHELL_COMMAND_COUNT];
 void utophuile_command_help(const char *args);
 void utophuile_command_status(const char *args);
 void utophuile_debug_command_pcf(const char *args);
+void utophuile_debug_command_monitor(const char *args);
 
 #ifdef SIMULATE_TEMP
 static volatile uint8_t _fake_utophuile_oil_temperature = 75;
@@ -59,7 +60,7 @@ static volatile alerter_mode_t _utophuile_alerter_mode = UTOPHUILE_ALERTER_ENABL
 #define UTOPHUILE_MIN_OIL_TEMPERATURE  59 /* Stop when < MIN_OIL_TEMP, ready when > ( MIN_OIL_TEMP + TOLERENCE ) */
 #define UTOPHUILE_MAX_OIL_TEMPERATURE  94 /* Stop when > MAX_OIL_TEMP, ready when < ( MAX_OIL_TEMP + TOLERENCE ) */
 
-static uint8_t _report_mode_enabled = 0;
+static uint8_t _report_mode_enabled = 1;
 static bool _debug_mode = true;
 
 int
@@ -91,6 +92,7 @@ main(void)
   SHELL_COMMAND_DECL(0, "help", "this help", false, utophuile_command_help);
   SHELL_COMMAND_DECL(1, "status", "system status", false, utophuile_command_status);
   SHELL_COMMAND_DECL(2, "pcf", "read/write from/to PCF8574 (relays)", true, utophuile_debug_command_pcf);
+  SHELL_COMMAND_DECL(3, "monitor", "enable monitor mode", true, utophuile_debug_command_monitor);
 
   sei();   /* Enable interrupts */
 
@@ -124,7 +126,6 @@ main(void)
           case 'r': // Report mode toggle
             if (_report_mode_enabled != 0) {
               _report_mode_enabled = 0;
-              printf("report mode off");
             } else {
               _report_mode_enabled = 1;
               printf("report mode on\n");
@@ -356,3 +357,15 @@ utophuile_debug_command_pcf(const char *args)
   }
 }
 
+// Monitor debug command
+void
+utophuile_debug_command_monitor(const char *args)
+{
+  if(_report_mode_enabled) {
+    printf_P(PSTR("monitor mode off\n"));
+    _report_mode_enabled = 0;
+  } else {
+    printf_P(PSTR("monitor mode on\n"));
+    _report_mode_enabled = 1;
+  }
+}
