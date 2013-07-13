@@ -64,6 +64,9 @@ static volatile alerter_mode_t _utophuile_alerter_mode = UTOPHUILE_ALERTER_ENABL
 static uint8_t _report_mode_enabled = 1;
 static bool _debug_mode = true;
 
+// Is oil temperature a fake ? (ie. sets by user in debug mode)
+static bool _utophuile_fake_oil_temperature = false;
+
 int
 main(void)
 {
@@ -138,18 +141,6 @@ main(void)
           case 'v': // Version
             printf_P(PSTR("\n"PACKAGE_STRING"\n"));
             break;
-          case 't': // Temperature
-    #ifdef SIMULATE_TEMP
-            if (sscanf(buf, "%*s %d", &d) > 0) {
-              printf("set temperature to %d", d);
-              _fake_utophuile_oil_temperature = d;
-            } else {
-              printf("t=%d (sim)", utophuile_oil_temperature());
-            }
-    #else // SIMULATE_TEMP
-            printf("t=%d", utophuile_oil_temperature());
-    #endif // SIMULATE_TEMP
-            break;
         }
         if (_report_mode_enabled == 0) printf("\n$ ");
     */
@@ -213,18 +204,19 @@ utophuile_set_mode(utophuile_mode_t mode)
   }
 }
 
+static int16_t _utophuile_oil_temperature = 20.0;
+
 void
 utophuile_process(void)
 {
-  int16_t oil_temperature = 20.0;
   const button_action_t requested_action = buttons_get_requested_action();
 
   // Retrieve temperature
-  oil_temperature = utophuile_oil_temperature();
+  _utophuile_oil_temperature = utophuile_oil_temperature();
 
   // Print data if report mode is enabled
   if (_report_mode_enabled != 0) {
-    printf("t=%"PRIi16"\n", oil_temperature);
+    printf("t=%"PRIi16"\n", _utophuile_oil_temperature);
   }
 
   static twi_connection_state local = CONNECTION_OK;
@@ -261,18 +253,18 @@ utophuile_process(void)
       break;
     case UTOPHUILE_MODE_HEATING:
       // Wait for a correct oil temperature
-      if (oil_temperature > UTOPHUILE_MIN_OIL_TEMPERATURE + UTOPHUILE_TOLERENCE_OIL_TEMPERATURE) {
+      if (_utophuile_oil_temperature > UTOPHUILE_MIN_OIL_TEMPERATURE + UTOPHUILE_TOLERENCE_OIL_TEMPERATURE) {
         utophuile_set_mode(UTOPHUILE_MODE_READY);
         beep_play_partition_P(PSTR("F_F_F"));
-      } else if (oil_temperature > UTOPHUILE_MAX_OIL_TEMPERATURE) {
+      } else if (_utophuile_oil_temperature > UTOPHUILE_MAX_OIL_TEMPERATURE) {
         utophuile_set_mode(UTOPHUILE_MODE_EMERGENCY);
       }
       break;
     case UTOPHUILE_MODE_READY:
       // Wait for oil mode request while checking temperatures stay OK
-      if (oil_temperature < UTOPHUILE_MIN_OIL_TEMPERATURE) {
+      if (_utophuile_oil_temperature < UTOPHUILE_MIN_OIL_TEMPERATURE) {
         utophuile_set_mode(UTOPHUILE_MODE_HEATING);
-      } else if (oil_temperature > UTOPHUILE_MAX_OIL_TEMPERATURE) {
+      } else if (_utophuile_oil_temperature > UTOPHUILE_MAX_OIL_TEMPERATURE) {
         utophuile_set_mode(UTOPHUILE_MODE_EMERGENCY);
       } else if (requested_action == BUTTON_ACTION_OK) {
         // User ask for oil mode
@@ -282,9 +274,9 @@ utophuile_process(void)
       break;
     case UTOPHUILE_MODE_OIL:
       // Check if all is OK
-      if (oil_temperature < UTOPHUILE_MIN_OIL_TEMPERATURE) {
+      if (_utophuile_oil_temperature < UTOPHUILE_MIN_OIL_TEMPERATURE) {
         utophuile_set_mode(UTOPHUILE_MODE_HEATING);
-      } else if (oil_temperature > UTOPHUILE_MAX_OIL_TEMPERATURE) {
+      } else if (_utophuile_oil_temperature > UTOPHUILE_MAX_OIL_TEMPERATURE) {
         utophuile_set_mode(UTOPHUILE_MODE_EMERGENCY);
       } else if (requested_action == BUTTON_ACTION_OK) {
         // User want to stop oil usage
@@ -294,7 +286,7 @@ utophuile_process(void)
       break;
     case UTOPHUILE_MODE_EMERGENCY:
       // Waiting for lower oil temperature
-      if (oil_temperature < UTOPHUILE_MAX_OIL_TEMPERATURE - UTOPHUILE_TOLERENCE_OIL_TEMPERATURE) {
+      if (_utophuile_oil_temperature < UTOPHUILE_MAX_OIL_TEMPERATURE - UTOPHUILE_TOLERENCE_OIL_TEMPERATURE) {
         utophuile_set_mode(UTOPHUILE_MODE_READY);
         beep_play_partition_P(PSTR("E"));
       } else if (requested_action == BUTTON_ACTION_OK) {
@@ -337,6 +329,8 @@ void
 utophuile_command_status(const char *args)
 {
   (void)args;
+
+  // Mode
   switch (_utophuile_mode) {
     case UTOPHUILE_MODE_OFF:
       printf_P(PSTR("Status: OFF\n"));
@@ -357,6 +351,10 @@ utophuile_command_status(const char *args)
       printf_P(PSTR("Status: ERROR\n"));
       break;
   }
+
+  // Temperature
+  printf_P(PSTR("Temperature: %"PRIi16"‰s\n"), _utophuile_oil_temperature, _utophuile_fake_oil_temperature?" (fake)":"");
+
 }
 
 // PCF debug command
