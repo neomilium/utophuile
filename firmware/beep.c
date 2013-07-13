@@ -13,8 +13,6 @@
 #define TCCRA			TCCR0A
 #define TCCRB			TCCR0B
 
-#include "leds.h"
-
 /*
   PWM is used in CTC mode @62.5Khz (16Mhz / 256)
 
@@ -117,6 +115,11 @@ void beep_play_partition_P(const char *partition)
 void
 beep_init(void)
 {
+  /* Enable OC0 as output. */
+  DDROC |= _BV(OC0);
+
+  // TODO: Set OC0 at low level
+
   // Au clair de la lune
 //  beep_play_partition_P(PSTR("c_c_c_d_e__d__c_e_d_d_c"));
 //  beep_play_partition_P(PSTR("C_C_C_D_E__D__C_E_D_D_C"));
@@ -131,9 +134,6 @@ beep_init(void)
 void
 beep_ctc_start(void)
 {
-  /* Enable OC0 as output. */
-  DDROC |= _BV(OC0);
-
   /* Timer 0 is 8-bit PWM. */
   TCCRA = _BV(WGM01) | _BV(COM0A0);	/*  Compare Output Mode, Fast PWM Mode + CTC mode */
   TCCRB = _BV(CS02);			/* 16 Mhz / 256 */
@@ -147,6 +147,8 @@ beep_ctc_stop(void)
 {
   /* Timer 0 is 8-bit PWM. */
   TCCRA = 0x00;
+
+  // TODO: Set OC0 at low level
 
   /* Disable timer 2 overflow interrupt. */
 // 	TIMSK &= ~(_BV(OCIE0));
