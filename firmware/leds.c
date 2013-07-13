@@ -9,10 +9,14 @@
 
 #include <stdio.h>
 
-#define LEDS_COM	GET_BIT(PORTD).bit6
-#define LED2		GET_BIT(PORTC).bit2
-#define LED1		GET_BIT(PORTC).bit3
-#define LED0		GET_BIT(PORTC).bit4
+// Common LEDs (Low = active, High = inactive)
+#define LEDS_COM	GET_BIT(PORTC).bit0 	// Arduino Analog Input 0
+// Green LED
+#define LED0		GET_BIT(PORTC).bit1 	// Arduino Analog Input 1
+// Orange LED
+#define LED1		GET_BIT(PORTC).bit2 	// Arduino Analog Input 2
+// Red LED
+#define LED2		GET_BIT(PORTC).bit3 	// Arduino Analog Input 3
 
 #define LED_ENABLED	0
 #define LED_DISABLED	1
@@ -21,39 +25,7 @@
 
 enum { UP, DOWN };
 
-#define TIMER2_PWM_INIT		_BV(WGM21) | _BV(WGM20) | _BV(COM21) | _BV(CS21) | _BV(CS20)	/* 8 Mhz / 32 = 250 Khz */
-
-#define OCR			OCR2
-#define DDROC			DDRD
-#define OC2			PD7
-#define TIMER2_TOP		255
-
 static leds_mode_t _leds_mode = LED_ALL_OFF;
-
-#if 0
-ISR(TIMER2_OVF_vect)
-{
-  static uint16_t pwm;
-  static uint8_t direction;
-
-  switch (direction) {
-    case UP:
-      if (++pwm == TIMER2_TOP)
-        direction = DOWN;
-      break;
-
-    case DOWN:
-      if (--pwm == 0)
-        direction = UP;
-      break;
-  }
-  if (pwm < 50) {
-    OCR = 0;
-  } else {
-    OCR = pwm;
-  }
-}
-#endif
 
 void leds_process(void);
 
@@ -63,45 +35,10 @@ leds_init(void)
   printf("leds_init()\n");
 
   /* Enable LEDs port as output. */
-  DDRC |= (_BV(PC2) | _BV(PC3) | _BV(PC4));
-
-  /* Set output direction for PD6 */
-  DDRD |= _BV(PD6);
+  DDRC |= (_BV(PC0) | _BV(PC1) | _BV(PC2) | _BV(PC3));
 
   scheduler_add_hook_fct(leds_process);
 }
-
-#if 0
-void
-leds_pwm_start(void)
-{
-  /* Enable OC2 as output. */
-  DDROC |= _BV(OC2);
-
-  /* Timer 2 is 8-bit PWM. */
-  TCCR2 = TIMER2_PWM_INIT;
-
-  /* Set PWM value to 0. */
-  OCR = 0;
-
-  /* Enable timer 2 overflow interrupt. */
-// 	TIFR &= ~(_BV (TOV2));
-  TIMSK |= _BV(TOIE2);
-}
-
-void
-leds_pwm_stop(void)
-{
-  /* Timer 2 is 8-bit PWM. */
-  TCCR2 = 0x00;
-
-  /* Disable timer 2 overflow interrupt. */
-  TIMSK &= ~(_BV(TOIE2));
-
-  /* Enable PD6 as output. */
-  DDRD |= _BV(PD6);
-}
-#endif
 
 void
 leds_set(const leds_mode_t mode)
