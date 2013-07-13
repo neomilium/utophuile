@@ -9,6 +9,7 @@
 
 #include "utophuile.h"
 
+#include "ads1115.h"
 #include "leds.h"
 #include "beep.h"
 #include "buttons.h"
@@ -85,6 +86,9 @@ main(void)
   // I²C / TWI
   twi_init();
 
+  // 16bits Analog-to-Digital Converter
+  ads1115_init();
+
 //  relay_init();
   
   scheduler_add_hook_fct(utophuile_process);
@@ -154,11 +158,19 @@ main(void)
   return (0);
 }
 
-uint8_t
+
+int16_t
 utophuile_oil_temperature(void)
 {
 #ifndef SIMULATE_TEMP
-  return 10;
+  int16_t adc = ads1115_read();
+  // return (((double)adc * 0.0217220010422) - 259.74025974);
+  printf_P(PSTR("adc: %"PRIi16), adc);
+  adc /= 46; // * 0.0217220010422 => / 46.0362743772
+  printf_P(PSTR(", tmp: %"PRIi16), adc);
+  adc -= 259; // - 259.74025974
+  printf_P(PSTR(", res: %"PRIi16"\n"), adc);
+  return adc;
 #else
   return _fake_utophuile_oil_temperature;
 #endif /* SIMULATE_TEMP */
@@ -204,7 +216,7 @@ utophuile_set_mode(utophuile_mode_t mode)
 void
 utophuile_process(void)
 {
-  uint8_t oil_temperature = 0;
+  int16_t oil_temperature = 20.0;
   const button_action_t requested_action = buttons_get_requested_action();
 
   // Retrieve temperature
@@ -212,12 +224,23 @@ utophuile_process(void)
 
   // Print data if report mode is enabled
   if (_report_mode_enabled != 0) {
-    printf("t=%d\n", oil_temperature);
+    printf("t=%"PRIi16"\n", oil_temperature);
+  }
+
+  static twi_connection_state local = CONNECTION_OK;
+  if ((ads1115_connection_state != local)) {
+    if(ads1115_connection_state == CONNECTION_OK) {
+      beep_play_partition_P(PSTR("DAA"));
+    } else {
+      beep_play_partition_P(PSTR("ADD"));
+    }
+    local = ads1115_connection_state;
   }
 
   /* Start / Stop actions */
   if (_utophuile_mode != UTOPHUILE_MODE_OFF) {
-    if (relay_connection_state != CONNECTION_OK) {
+    // FIXME Use different error beeps
+    if ((relay_connection_state != CONNECTION_OK) || (ads1115_connection_state != CONNECTION_OK)){
       utophuile_set_mode(UTOPHUILE_MODE_ERROR);
     }
 
