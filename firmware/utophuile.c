@@ -75,8 +75,8 @@ main(void)
 
   scheduler_init();
   
-//    buttons_init();
-//    leds_init();
+  buttons_init();
+  leds_init();
 
   // Buzzer
   beep_init();
