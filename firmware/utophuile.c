@@ -79,7 +79,7 @@ main(void)
   printf_P(PSTR("\n"PACKAGE_STRING"\n"));
 
   scheduler_init();
-  
+
   buttons_init();
   leds_init();
 
@@ -93,7 +93,7 @@ main(void)
   ads1115_init();
 
 //  relay_init();
-  
+
   scheduler_add_hook_fct(utophuile_process);
 
   SHELL_COMMAND_DECL(0, "help", "this help", false, utophuile_command_help);
@@ -221,7 +221,7 @@ utophuile_process(void)
 
   static twi_connection_state local = CONNECTION_OK;
   if ((ads1115_connection_state != local)) {
-    if(ads1115_connection_state == CONNECTION_OK) {
+    if (ads1115_connection_state == CONNECTION_OK) {
       beep_play_partition_P(PSTR("DAA"));
     } else {
       beep_play_partition_P(PSTR("ADD"));
@@ -232,7 +232,7 @@ utophuile_process(void)
   /* Start / Stop actions */
   if (_utophuile_mode != UTOPHUILE_MODE_OFF) {
     // FIXME Use different error beeps
-    if ((relay_connection_state != CONNECTION_OK) || (ads1115_connection_state != CONNECTION_OK)){
+    if ((relay_connection_state != CONNECTION_OK) || (ads1115_connection_state != CONNECTION_OK)) {
       utophuile_set_mode(UTOPHUILE_MODE_ERROR);
     }
 
@@ -353,14 +353,14 @@ utophuile_command_status(const char *args)
   }
 
   // Temperature
-  printf_P(PSTR("Temperature: %"PRIi16"‰s\n"), _utophuile_oil_temperature, _utophuile_fake_oil_temperature?" (fake)":"");
+  printf_P(PSTR("Temperature: %"PRIi16"‰s\n"), _utophuile_oil_temperature, _utophuile_fake_oil_temperature ? " (fake)" : "");
 
   // Relays
   const uint8_t rm = relay_mode();
-  printf_P(PSTR("Valve input: %s (feedback: %s)\n"), 	(rm & _BV(RELAY_VALVE_INPUT))?"ON":"OFF", (rm & _BV(RELAY_FB_VALVE_INPUT))?"ON":"OFF");
-  printf_P(PSTR("Valve output: %s (feedback: %s)\n"), 	(rm & _BV(RELAY_VALVE_OUTPUT))?"ON":"OFF", (rm & _BV(RELAY_FB_VALVE_OUTPUT))?"ON":"OFF");
-  printf_P(PSTR("Pump: %s (feedback: %s)\n"), 		(rm & _BV(RELAY_PUMP))?"ON":"OFF", (rm & _BV(RELAY_FB_PUMP))?"ON":"OFF");
-  printf_P(PSTR("Heater: %s (feedback: %s)\n"), 	(rm & _BV(RELAY_HEATER))?"ON":"OFF", (rm & _BV(RELAY_FB_HEATER))?"ON":"OFF");
+  printf_P(PSTR("Valve input: %s (feedback: %s)\n"),	(rm & _BV(RELAY_VALVE_INPUT)) ? "ON" : "OFF", (rm & _BV(RELAY_FB_VALVE_INPUT)) ? "ON" : "OFF");
+  printf_P(PSTR("Valve output: %s (feedback: %s)\n"),	(rm & _BV(RELAY_VALVE_OUTPUT)) ? "ON" : "OFF", (rm & _BV(RELAY_FB_VALVE_OUTPUT)) ? "ON" : "OFF");
+  printf_P(PSTR("Pump: %s (feedback: %s)\n"),	(rm & _BV(RELAY_PUMP)) ? "ON" : "OFF", (rm & _BV(RELAY_FB_PUMP)) ? "ON" : "OFF");
+  printf_P(PSTR("Heater: %s (feedback: %s)\n"),	(rm & _BV(RELAY_HEATER)) ? "ON" : "OFF", (rm & _BV(RELAY_FB_HEATER)) ? "ON" : "OFF");
 }
 
 // PCF debug command
@@ -388,7 +388,7 @@ utophuile_debug_command_pcf(const char *args)
 void
 utophuile_debug_command_monitor(const char *args)
 {
-  if(_report_mode_enabled) {
+  if (_report_mode_enabled) {
     printf_P(PSTR("monitor mode off\n"));
     _report_mode_enabled = 0;
   } else {

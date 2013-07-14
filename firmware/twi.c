@@ -283,7 +283,7 @@ quit:
   return rv;
 
 error:
-  if(rv==0) rv = TWI_ERR_UNKNOWN;
+  if (rv == 0) rv = TWI_ERR_UNKNOWN;
   goto quit;
 }
 

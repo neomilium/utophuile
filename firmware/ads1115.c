@@ -70,8 +70,8 @@
 #define ADS1115_REG_CONVERSION 	0x00
 #define ADS1115_REG_CONFIG 	0x01
 
-void 
-ads1115_init (void)
+void
+ads1115_init(void)
 {
   // FIXME Test connection
   ads1115_connection_state = CONNECTION_OK;
@@ -80,7 +80,7 @@ ads1115_init (void)
 
 #define ADS1115_ERR_CONNECTION_LOST -32768
 int16_t
-ads1115_read (void)
+ads1115_read(void)
 {
   // Set configuration
   uint8_t data[3] = { ADS1115_REG_CONFIG, (ADS1115_CFG_CH0 >> 8), (ADS1115_CFG_CH0 & 0xff) };
@@ -92,7 +92,7 @@ ads1115_read (void)
   }
 
   // Read configuration
-  if(0 > twi_read_bytes(ADS1115_ADDRESS, 2, data)) {
+  if (0 > twi_read_bytes(ADS1115_ADDRESS, 2, data)) {
     ads1115_connection_state = CONNECTION_BROKEN;
     return ADS1115_ERR_CONNECTION_LOST;
   } else {
@@ -117,7 +117,7 @@ ads1115_read (void)
   }
 
   // Read register
-  if(0 > twi_read_bytes(ADS1115_ADDRESS, 2, data)) {
+  if (0 > twi_read_bytes(ADS1115_ADDRESS, 2, data)) {
     ads1115_connection_state = CONNECTION_BROKEN;
     return ADS1115_ERR_CONNECTION_LOST;
   } else {
