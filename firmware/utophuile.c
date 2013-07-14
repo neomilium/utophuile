@@ -355,6 +355,12 @@ utophuile_command_status(const char *args)
   // Temperature
   printf_P(PSTR("Temperature: %"PRIi16"‰s\n"), _utophuile_oil_temperature, _utophuile_fake_oil_temperature?" (fake)":"");
 
+  // Relays
+  const uint8_t rm = relay_mode();
+  printf_P(PSTR("Valve input: %s (feedback: %s)\n"), 	(rm & _BV(RELAY_VALVE_INPUT))?"ON":"OFF", (rm & _BV(RELAY_FB_VALVE_INPUT))?"ON":"OFF");
+  printf_P(PSTR("Valve output: %s (feedback: %s)\n"), 	(rm & _BV(RELAY_VALVE_OUTPUT))?"ON":"OFF", (rm & _BV(RELAY_FB_VALVE_OUTPUT))?"ON":"OFF");
+  printf_P(PSTR("Pump: %s (feedback: %s)\n"), 		(rm & _BV(RELAY_PUMP))?"ON":"OFF", (rm & _BV(RELAY_FB_PUMP))?"ON":"OFF");
+  printf_P(PSTR("Heater: %s (feedback: %s)\n"), 	(rm & _BV(RELAY_HEATER))?"ON":"OFF", (rm & _BV(RELAY_FB_HEATER))?"ON":"OFF");
 }
 
 // PCF debug command
