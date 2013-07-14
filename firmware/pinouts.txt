@@ -1,0 +1,19 @@
+### Buttons ###
+Action/Power: 	PD2 - Arduino Digital Pin 2
+
+### Beep ###
+BEEP: 		PD6 - Arduino Digital Pin 6
+
+### I²C / TWI ###
+SDA: 		PC4 - Arduino Analog Input 4
+SCL: 		PC5 - Arduino Analog Input 5
+
+### LEDs ###
+LED common: 	PD6 - Arduino Analog Input 0
+Green LED: 	PC2 - Arduino Analog Input 1
+Orange LED: 	PC2 - Arduino Analog Input 2
+Red LED: 	PC2 - Arduino Analog Input 3
+
+### UART ###
+RX: 		PD0 - Arduino Digital Pin 0
+TX: 		PD1 - Arduino Digital Pïn 1
