@@ -43,10 +43,8 @@ void utophuile_command_help(const char *args);
 void utophuile_command_status(const char *args);
 void utophuile_debug_command_pcf(const char *args);
 void utophuile_debug_command_monitor(const char *args);
+void utophuile_debug_command_fake(const char *args);
 
-#ifdef SIMULATE_TEMP
-static volatile uint8_t _fake_utophuile_oil_temperature = 75;
-#endif
 
 static volatile utophuile_mode_t _utophuile_mode = UTOPHUILE_MODE_OFF;
 static volatile utophuile_mode_t _utophuile_previous_mode = UTOPHUILE_MODE_OFF;
@@ -65,7 +63,7 @@ static uint8_t _report_mode_enabled = 1;
 static bool _debug_mode = true;
 
 // Is oil temperature a fake ? (ie. sets by user in debug mode)
-static bool _utophuile_fake_oil_temperature = false;
+static bool _utophuile_oil_temperature_is_fake = false;
 
 int
 main(void)
@@ -100,6 +98,7 @@ main(void)
   SHELL_COMMAND_DECL(1, "status", "system status", false, utophuile_command_status);
   SHELL_COMMAND_DECL(2, "pcf", "read/write from/to PCF8574 (relays)", true, utophuile_debug_command_pcf);
   SHELL_COMMAND_DECL(3, "monitor", "enable monitor mode", true, utophuile_debug_command_monitor);
+  SHELL_COMMAND_DECL(4, "fake temp", "set a simulated value", true, utophuile_debug_command_fake);
 
   sei();   /* Enable interrupts */
 
@@ -150,21 +149,23 @@ main(void)
 }
 
 
+static int16_t _fake_oil_temperature;
+
 int16_t
 utophuile_oil_temperature(void)
 {
-#ifndef SIMULATE_TEMP
-  int16_t adc = ads1115_read();
-  // return (((double)adc * 0.0217220010422) - 259.74025974);
-  printf_P(PSTR("adc: %"PRIi16), adc);
-  adc /= 46; // * 0.0217220010422 => / 46.0362743772
-  printf_P(PSTR(", tmp: %"PRIi16), adc);
-  adc -= 259; // - 259.74025974
-  printf_P(PSTR(", res: %"PRIi16"\n"), adc);
-  return adc;
-#else
-  return _fake_utophuile_oil_temperature;
-#endif /* SIMULATE_TEMP */
+  if(!_utophuile_oil_temperature_is_fake) {
+    int16_t adc = ads1115_read();
+    // return (((double)adc * 0.0217220010422) - 259.74025974);
+    printf_P(PSTR("adc: %"PRIi16), adc);
+    adc /= 46; // * 0.0217220010422 => / 46.0362743772
+    printf_P(PSTR(", tmp: %"PRIi16), adc);
+    adc -= 259; // - 259.74025974
+    printf_P(PSTR(", res: %"PRIi16"\n"), adc);
+    return adc;
+  } else {
+    return _fake_oil_temperature;
+  }
 }
 
 void
@@ -353,7 +354,7 @@ utophuile_command_status(const char *args)
   }
 
   // Temperature
-  printf_P(PSTR("Temperature: %"PRIi16"‰s\n"), _utophuile_oil_temperature, _utophuile_fake_oil_temperature ? " (fake)" : "");
+  printf_P(PSTR("Temperature: %"PRIi16"‰s\n"), _utophuile_oil_temperature, _utophuile_oil_temperature_is_fake ? " (fake)" : "");
 
   // Relays
   const uint8_t rm = relay_mode();
@@ -388,11 +389,34 @@ utophuile_debug_command_pcf(const char *args)
 void
 utophuile_debug_command_monitor(const char *args)
 {
+  (void)args;
   if (_report_mode_enabled) {
     printf_P(PSTR("monitor mode off\n"));
     _report_mode_enabled = 0;
   } else {
     printf_P(PSTR("monitor mode on\n"));
     _report_mode_enabled = 1;
+  }
+}
+
+// Fake values
+void
+utophuile_debug_command_fake(const char *args)
+{
+  char subcommand[128];
+  if (sscanf_P(args, PSTR("%*s %s"), subcommand) > 0) {
+    // Look for an exact match
+    for (size_t n = 0; n < 1; n++) {
+      if (0 == strcmp_P(subcommand, PSTR("temp"))) {
+        if (sscanf_P(args, PSTR("%*s %*s %"PRIi16), _fake_oil_temperature) > 0) {
+          _utophuile_oil_temperature_is_fake = true;
+          printf_P(PSTR("fake oil temperature: %"PRIi16"\n"));
+          return;
+        } else {
+          printf_P(PSTR("fake oil temperature disabled\n"));
+          return;
+        }
+      }
+    }
   }
 }

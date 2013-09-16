@@ -3,6 +3,6 @@
 
 #include "version.h"
 
-#define SHELL_COMMAND_COUNT 4
+#define SHELL_COMMAND_COUNT 5
 
 #endif
