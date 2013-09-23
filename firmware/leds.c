@@ -32,8 +32,6 @@ void leds_process(void);
 void
 leds_init(void)
 {
-  printf("leds_init()\n");
-
   /* Enable LEDs port as output. */
   DDRC |= (_BV(PC0) | _BV(PC1) | _BV(PC2) | _BV(PC3));
 

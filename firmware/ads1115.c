@@ -100,8 +100,8 @@ ads1115_read(void)
   }
 
   // Compare if its OK
-  uint16_t config = (data[0] << 8) | data[1];
-  printf_P(PSTR("Expected: %04x, register: %04x\n"), ADS1115_CFG_CH0 & ~(0x8000), config);
+  // uint16_t config = (data[0] << 8) | data[1];
+  // printf_P(PSTR("Expected: %04x, register: %04x\n"), ADS1115_CFG_CH0 & ~(0x8000), config);
 
   // Retrieve conversion result
   // Important: this will return the PREVIOUS converted value, to retrieve the

@@ -59,7 +59,7 @@ static volatile alerter_mode_t _utophuile_alerter_mode = UTOPHUILE_ALERTER_ENABL
 #define UTOPHUILE_MIN_OIL_TEMPERATURE  59 /* Stop when < MIN_OIL_TEMP, ready when > ( MIN_OIL_TEMP + TOLERENCE ) */
 #define UTOPHUILE_MAX_OIL_TEMPERATURE  94 /* Stop when > MAX_OIL_TEMP, ready when < ( MAX_OIL_TEMP + TOLERENCE ) */
 
-static uint8_t _report_mode_enabled = 1;
+static uint8_t _report_mode_enabled = 0;
 static bool _debug_mode = true;
 
 // Is oil temperature a fake ? (ie. sets by user in debug mode)
@@ -107,41 +107,10 @@ main(void)
   for (;;) {
     shell_loop();
     /*
-        switch (tolower(buf[0])) {
-          case '\n':
-            break;
-          default:
-            printf_P(PSTR("unknown command: %c"), buf[0]);
-            break;
-
-          case 'l': // Leds
-            if (sscanf(buf, "%*s %s", s) > 0) {
-              switch (s[0]) {
-                case 'g':
-                  leds_set(LED_GREEN_BLINK);
-                  break;
-                case 'r':
-                  leds_set(LED_RED_BLINK);
-                  break;
-                case 'o':
-                  leds_set(LED_ORANGE_BLINK);
-                  break;
-              }
-            }
-            break;
-          case 'r': // Report mode toggle
-            if (_report_mode_enabled != 0) {
-              _report_mode_enabled = 0;
-            } else {
-              _report_mode_enabled = 1;
-              printf("report mode on\n");
-            }
-            break;
           case 'v': // Version
             printf_P(PSTR("\n"PACKAGE_STRING"\n"));
             break;
         }
-        if (_report_mode_enabled == 0) printf("\n$ ");
     */
     sleep_mode();
   }
@@ -157,11 +126,11 @@ utophuile_oil_temperature(void)
   if(!_utophuile_oil_temperature_is_fake) {
     int16_t adc = ads1115_read();
     // return (((double)adc * 0.0217220010422) - 259.74025974);
-    printf_P(PSTR("adc: %"PRIi16), adc);
+    // printf_P(PSTR("adc: %"PRIi16), adc);
     adc /= 46; // * 0.0217220010422 => / 46.0362743772
-    printf_P(PSTR(", tmp: %"PRIi16), adc);
+    // printf_P(PSTR(", tmp: %"PRIi16), adc);
     adc -= 259; // - 259.74025974
-    printf_P(PSTR(", res: %"PRIi16"\n"), adc);
+    // printf_P(PSTR(", res: %"PRIi16"\n"), adc);
     return adc;
   } else {
     return _fake_oil_temperature;
@@ -354,7 +323,7 @@ utophuile_command_status(const char *args)
   }
 
   // Temperature
-  printf_P(PSTR("Temperature: %"PRIi16"‰s\n"), _utophuile_oil_temperature, _utophuile_oil_temperature_is_fake ? " (fake)" : "");
+  printf_P(PSTR("Temperature: %"PRIi16" °C %s\n"), _utophuile_oil_temperature, _utophuile_oil_temperature_is_fake ? " (fake)" : "");
 
   // Relays
   const uint8_t rm = relay_mode();

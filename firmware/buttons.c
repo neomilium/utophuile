@@ -37,7 +37,6 @@ ISR(INT0_vect)
     _button0_state = BUTTON_PRESSED;
     _button0_pressed_counter = 0;
   }
-  printf("button\n");
 }
 
 void
