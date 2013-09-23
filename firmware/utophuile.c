@@ -98,7 +98,7 @@ main(void)
   SHELL_COMMAND_DECL(1, "status", "system status", false, utophuile_command_status);
   SHELL_COMMAND_DECL(2, "pcf", "read/write from/to PCF8574 (relays)", true, utophuile_debug_command_pcf);
   SHELL_COMMAND_DECL(3, "monitor", "enable monitor mode", true, utophuile_debug_command_monitor);
-  SHELL_COMMAND_DECL(4, "fake temp", "set a simulated value", true, utophuile_debug_command_fake);
+  SHELL_COMMAND_DECL(4, "fake", "set a simulated value", true, utophuile_debug_command_fake);
 
   sei();   /* Enable interrupts */
 
@@ -377,15 +377,17 @@ utophuile_debug_command_fake(const char *args)
     // Look for an exact match
     for (size_t n = 0; n < 1; n++) {
       if (0 == strcmp_P(subcommand, PSTR("temp"))) {
-        if (sscanf_P(args, PSTR("%*s %*s %"PRIi16), _fake_oil_temperature) > 0) {
+        if (sscanf_P(args, PSTR("%*s %*s %"PRIi16), &_fake_oil_temperature) > 0) {
           _utophuile_oil_temperature_is_fake = true;
-          printf_P(PSTR("fake oil temperature: %"PRIi16"\n"));
+          printf_P(PSTR("fake oil temperature: %"PRIi16"\n"), _fake_oil_temperature);
           return;
         } else {
+          _utophuile_oil_temperature_is_fake = false;
           printf_P(PSTR("fake oil temperature disabled\n"));
           return;
         }
       }
     }
+    printf_P(PSTR("\"%s\" is not an unknown subcommand of 'fake'\n"), subcommand);
   }
 }
