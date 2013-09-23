@@ -1,6 +1,8 @@
 #ifndef __RELAY_H__
 #define __RELAY_H__
 
+#include <stdbool.h>
+
 #include "twi.h"
 
 // Relay board is wired around a PCF8574 chip.
@@ -22,7 +24,8 @@
 volatile twi_connection_state relay_connection_state;
 
 void relay_init(void);
-void relay_set(const uint8_t relay_mode);
+void relay_set(const uint8_t relay, const bool on);
+void relay_set_mode(const uint8_t relay_mode);
 uint8_t relay_mode(void);
 
 #endif /* __RELAY_H__ */

@@ -41,7 +41,7 @@ void utophuile_set_mode(utophuile_mode_t mode);
 shell_command_t shell_commands[SHELL_COMMAND_COUNT];
 void utophuile_command_help(const char *args);
 void utophuile_command_status(const char *args);
-void utophuile_debug_command_pcf(const char *args);
+void utophuile_debug_command_relay(const char *args);
 void utophuile_debug_command_monitor(const char *args);
 void utophuile_debug_command_fake(const char *args);
 
@@ -90,13 +90,13 @@ main(void)
   // 16bits Analog-to-Digital Converter
   ads1115_init();
 
-//  relay_init();
+  relay_init();
 
   scheduler_add_hook_fct(utophuile_process);
 
   SHELL_COMMAND_DECL(0, "help", "this help", false, utophuile_command_help);
   SHELL_COMMAND_DECL(1, "status", "system status", false, utophuile_command_status);
-  SHELL_COMMAND_DECL(2, "pcf", "read/write from/to PCF8574 (relays)", true, utophuile_debug_command_pcf);
+  SHELL_COMMAND_DECL(2, "relay", "active/disactive relay (VI, VO, P, H)", true, utophuile_debug_command_relay);
   SHELL_COMMAND_DECL(3, "monitor", "enable monitor mode", true, utophuile_debug_command_monitor);
   SHELL_COMMAND_DECL(4, "fake", "set a simulated value", true, utophuile_debug_command_fake);
 
@@ -145,23 +145,23 @@ utophuile_set_mode(utophuile_mode_t mode)
     _utophuile_mode = mode;
     switch (mode) {
       case UTOPHUILE_MODE_OFF:
-        relay_set(RELAY_OFF);
+        relay_set_mode(RELAY_OFF);
         leds_set(LED_ALL_OFF);
         break;
       case UTOPHUILE_MODE_HEATING:
-        relay_set(_BV(RELAY_PUMP) | _BV(RELAY_HEATER));
+        relay_set_mode(_BV(RELAY_PUMP) | _BV(RELAY_HEATER));
         leds_set(LED_RED_ON);
         break;
       case UTOPHUILE_MODE_READY:
-        relay_set(_BV(RELAY_PUMP) | _BV(RELAY_HEATER));
+        relay_set_mode(_BV(RELAY_PUMP) | _BV(RELAY_HEATER));
         leds_set(LED_ORANGE_BLINK);
         break;
       case UTOPHUILE_MODE_OIL:
-        relay_set(_BV(RELAY_VALVE_INPUT) | _BV(RELAY_VALVE_OUTPUT) | _BV(RELAY_PUMP) | _BV(RELAY_HEATER));
+        relay_set_mode(_BV(RELAY_VALVE_INPUT) | _BV(RELAY_VALVE_OUTPUT) | _BV(RELAY_PUMP) | _BV(RELAY_HEATER));
         leds_set(LED_GREEN_ON);
         break;
       case UTOPHUILE_MODE_EMERGENCY:
-        relay_set(RELAY_OFF);
+        relay_set_mode(RELAY_OFF);
         leds_set(LED_RED_BLINK);
         _utophuile_alerter_mode = UTOPHUILE_ALERTER_ENABLED;
         beep_play_partition_P(PSTR("G"));
@@ -333,27 +333,6 @@ utophuile_command_status(const char *args)
   printf_P(PSTR("Heater: %s (feedback: %s)\n"),	(rm & _BV(RELAY_HEATER)) ? "ON" : "OFF", (rm & _BV(RELAY_FB_HEATER)) ? "ON" : "OFF");
 }
 
-// PCF debug command
-void
-utophuile_debug_command_pcf(const char *args)
-{
-  uint8_t pcf_data;
-  if (sscanf_P(args, PSTR("%*s %" PRIu8), &pcf_data) > 0) {
-    if (-1 != twi_write_bytes(0x40, 1, &pcf_data)) {
-      printf_P(PSTR("write %#02x to pcf data\n"), pcf_data);
-    } else {
-      printf_P(PSTR("unable to write to pcf\n"));
-    }
-  } else {
-    printf_P(PSTR("Reading PCF value...\n"));
-    if (-1 != twi_read_bytes(0x40, 1, &pcf_data)) {
-      printf_P(PSTR("pcf data = %#02x\n"), pcf_data);
-    } else {
-      printf_P(PSTR("unable to read pcf data\n"));
-    }
-  }
-}
-
 // Monitor debug command
 void
 utophuile_debug_command_monitor(const char *args)
@@ -389,5 +368,48 @@ utophuile_debug_command_fake(const char *args)
       }
     }
     printf_P(PSTR("\"%s\" is not an unknown subcommand of 'fake'\n"), subcommand);
+  }
+}
+
+// Relay
+typedef struct {
+  const char *label;
+  uint8_t value;
+} relay_item;
+
+#define RELAY_DECL(ID, LABEL, VALUE) \
+  static const char relay##ID##_label[] PROGMEM = LABEL; \
+  relay_lut[ID].label = relay##ID##_label; \
+  relay_lut[ID].value = VALUE;
+
+static relay_item relay_lut[4];
+
+void
+utophuile_debug_command_relay(const char *args)
+{
+  RELAY_DECL(0, "VI", RELAY_VALVE_INPUT);
+  RELAY_DECL(1, "VO", RELAY_VALVE_OUTPUT);
+  RELAY_DECL(2, "P", RELAY_PUMP);
+  RELAY_DECL(3, "H", RELAY_HEATER);
+
+  char subcommand[128];
+  if (sscanf_P(args, PSTR("%*s %s"), subcommand) > 0) {
+    // Look for an exact match
+    bool found = false;
+    for (size_t n = 0; (n < 4) & !found; n++) {
+      if (0 == strcmp_P(subcommand, relay_lut[n].label)) {
+        uint8_t on;
+        if (sscanf_P(args, PSTR("%*s %*s %u"), &on) > 0) {
+          const uint8_t lut_value = relay_lut[n].value;
+          printf_P(PSTR("on: %"PRIu8"\n"), on);
+          printf_P(PSTR("lut value: %"PRIu8"\n"), lut_value);
+          printf_P(PSTR("rm before: %"PRIu8"\n"), relay_mode());
+          relay_set(lut_value, on);
+          printf_P(PSTR("rm after: %"PRIu8"\n"), relay_mode());
+        } else {
+          printf_P(PSTR("%s is %s\n"), relay_lut[n].label, (relay_mode() & relay_lut[n].value) ? "ON" : "OFF");
+        }
+      }
+    }
   }
 }
