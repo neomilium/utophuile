@@ -123,7 +123,7 @@ static int16_t _fake_oil_temperature;
 int16_t
 utophuile_oil_temperature(void)
 {
-  if(!_utophuile_oil_temperature_is_fake) {
+  if (!_utophuile_oil_temperature_is_fake) {
     int16_t adc = ads1115_read();
     // return (((double)adc * 0.0217220010422) - 259.74025974);
     // printf_P(PSTR("adc: %"PRIi16), adc);
